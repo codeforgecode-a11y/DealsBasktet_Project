@@ -1,13 +1,14 @@
 # DealsBasket - Local E-commerce Platform API
 
-A comprehensive Django REST Framework backend for a local e-commerce platform with role-based access control, Firebase authentication, and real-time order management.
+A comprehensive Django REST Framework backend for a local e-commerce platform with role-based access control, JWT authentication, and real-time order management.
 
 ## Features
 
 ### 🔐 Authentication & Authorization
-- Firebase ID token authentication
+- JWT token authentication with access and refresh tokens
 - Role-based access control (User, Shopkeeper, Delivery, Admin)
 - Custom permission classes for each role
+- Token blacklisting for secure logout
 
 ### 🏪 Shop Management
 - Shop registration and approval workflow
@@ -47,7 +48,7 @@ A comprehensive Django REST Framework backend for a local e-commerce platform wi
 
 - **Backend**: Django 5.2.4 + Django REST Framework 3.15.2
 - **Database**: PostgreSQL (production) / SQLite (development)
-- **Authentication**: Firebase Admin SDK
+- **Authentication**: JWT (JSON Web Tokens)
 - **File Storage**: Cloudinary
 - **API Documentation**: drf-spectacular (Swagger/OpenAPI)
 - **Deployment**: Docker + Nginx + Gunicorn
@@ -57,7 +58,6 @@ A comprehensive Django REST Framework backend for a local e-commerce platform wi
 ### Prerequisites
 - Python 3.11+
 - PostgreSQL (for production)
-- Firebase project with service account
 - Cloudinary account
 
 ### Installation
@@ -121,12 +121,11 @@ DB_PASSWORD=your_db_password
 DB_HOST=localhost
 DB_PORT=5432
 
-# Firebase Configuration
-FIREBASE_PROJECT_ID=your-project-id
-FIREBASE_PRIVATE_KEY_ID=your-private-key-id
-FIREBASE_PRIVATE_KEY=your-private-key
-FIREBASE_CLIENT_EMAIL=your-client-email
-FIREBASE_CLIENT_ID=your-client-id
+# JWT Configuration
+JWT_SECRET_KEY=your-secret-key-here
+JWT_ACCESS_TOKEN_LIFETIME_MINUTES=60
+JWT_REFRESH_TOKEN_LIFETIME_DAYS=7
+JWT_ALLOW_REFRESH=true
 
 # Cloudinary Configuration
 CLOUDINARY_CLOUD_NAME=your-cloud-name
@@ -134,12 +133,7 @@ CLOUDINARY_API_KEY=your-api-key
 CLOUDINARY_API_SECRET=your-api-secret
 ```
 
-### Firebase Setup
 
-1. Create a Firebase project
-2. Generate a service account key
-3. Add the credentials to your `.env` file
-4. Enable Authentication in Firebase Console
 
 ### Cloudinary Setup
 

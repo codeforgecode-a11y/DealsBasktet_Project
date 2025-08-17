@@ -1,0 +1,44 @@
+[run]
+source = .
+omit = 
+    */venv/*
+    */env/*
+    */migrations/*
+    */settings/*
+    */static/*
+    */staticfiles/*
+    */media/*
+    */node_modules/*
+    */tests/*
+    */test_*.py
+    */__pycache__/*
+    manage.py
+    */wsgi.py
+    */asgi.py
+    */conftest.py
+    */setup.py
+    */build/*
+    */dist/*
+    .tox/*
+    */Frontend_UI/*
+    */Credentials/*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if self.debug:
+    if settings.DEBUG
+    raise AssertionError
+    raise NotImplementedError
+    if 0:
+    if __name__ == .__main__.:
+    class .*\bProtocol\):
+    @(abc\.)?abstractmethod
+
+[html]
+directory = htmlcov
+title = DealsBasket Test Coverage Report
+
+[xml]
+output = coverage.xml
