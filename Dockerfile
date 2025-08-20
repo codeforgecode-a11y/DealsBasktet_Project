@@ -1,11 +1,12 @@
-# Use Python 3.12 slim image
+# Use an official Python runtime as a parent image
 FROM python:3.12-slim
 
 # Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV DJANGO_SETTINGS_MODULE=server.settings.production
-ENV TZ=UTC
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    DEBIAN_FRONTEND=noninteractive \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
 
 # Set work directory
 WORKDIR /app
@@ -14,30 +15,24 @@ WORKDIR /app
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         postgresql-client \
-        build-essential \
         libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+        gcc \
+        python3-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
-# Install Python dependencies
-COPY requirements.txt /app/
+# Install Python dependencies first to cache the layer
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy project
-COPY . /app/
+COPY . .
 
-# Create logs directory
-RUN mkdir -p logs
-
-# Collect static files
-RUN python manage.py collectstatic --noinput
-
-# Create non-root user
-RUN adduser --disabled-password --gecos '' appuser
-RUN chown -R appuser:appuser /app
-USER appuser
-
-# Expose port
+# Collect static files and run migrations at runtime
 EXPOSE 8000
 
-# Run the application
-CMD ["gunicorn", "server.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
+# Start script
+COPY scripts/start_services.sh /start.sh
+RUN chmod +x /start.sh
+
+CMD ["/start.sh"]

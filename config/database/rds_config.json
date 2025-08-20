@@ -1,11 +1,10 @@
 {
     "database": {
-        "host": "dealsbasket-db.ckfqcgyiasps.us-east-1.rds.amazonaws.com",
+        "host": "localhost",
         "port": 5432,
         "name": "dealsbasket_db",
-        "username": "dealsbasket_user",
-        "region": "us-east-1",
+        "username": "postgres",
         "engine": "postgres",
-        "version": "13.20"
+        "version": "13+"
     }
 }

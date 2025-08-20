@@ -27,26 +27,26 @@ INSTALLED_APPS = [
     'cloudinary',
     
     # Local apps
-    'users',
-    'shop',
-    'products',
-    'orders', 
-    'delivery',
-    'adminpanel',
+    'apps.users',
+    'apps.shop',
+    'apps.products',
+    'apps.orders',
+    'apps.delivery',
+    'apps.adminpanel',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'users.security_middleware.SecurityHeadersMiddleware',
+    'apps.users.security_middleware.SecurityHeadersMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'users.security_middleware.RateLimitMiddleware',
+    'apps.users.security_middleware.RateLimitMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'users.security_middleware.CSRFExemptionMiddleware',
+    'apps.users.security_middleware.CSRFExemptionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'users.security_middleware.AuthenticationLoggingMiddleware',
-    'users.security_middleware.TokenValidationMiddleware',
+    'apps.users.security_middleware.AuthenticationLoggingMiddleware',
+    'apps.users.security_middleware.TokenValidationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -101,7 +101,7 @@ AUTH_USER_MODEL = 'users.User'
 # Django REST Framework Configuration
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'users.jwt_authentication.JWTAuthentication',
+        'apps.users.jwt_authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [

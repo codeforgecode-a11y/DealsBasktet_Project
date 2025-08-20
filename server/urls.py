@@ -8,6 +8,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import HttpResponse
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularRedocView,
@@ -16,7 +17,12 @@ from drf_spectacular.views import (
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from .health import health_check
+from .health import health_check, simple_health_check
+
+
+def basic_health_check(request):
+    """Ultra-simple health check that bypasses all Django middleware"""
+    return HttpResponse("OK", content_type="text/plain", status=200)
 
 
 @api_view(['GET'])
@@ -50,24 +56,26 @@ urlpatterns = [
     # Django admin
     path('admin/', admin.site.urls),
 
-    # Health check
+    # Health check endpoints
     path('health/', health_check, name='health-check'),
+    path('simple-health/', simple_health_check, name='simple-health-check'),
+    path('basic-health/', basic_health_check, name='basic-health-check'),
 
     # API root
     path('api/', api_root, name='api-root'),
 
     # Authentication endpoints
     # Authentication endpoints
-    path('api/auth/', include('users.auth_urls')),
-    path('api/auth/jwt/', include('users.jwt_urls')),
+    path('api/auth/', include('apps.users.auth_urls')),
+    path('api/auth/jwt/', include('apps.users.jwt_urls')),
 
     # API v1 endpoints
-    path('api/v1/users/', include('users.urls')),
-    path('api/v1/shops/', include('shop.urls')),
-    path('api/v1/products/', include('products.urls')),
-    path('api/v1/orders/', include('orders.urls')),
-    path('api/v1/delivery/', include('delivery.urls')),
-    path('api/v1/admin/', include('adminpanel.urls')),
+    path('api/v1/users/', include('apps.users.urls')),
+    path('api/v1/shops/', include('apps.shop.urls')),
+    path('api/v1/products/', include('apps.products.urls')),
+    path('api/v1/orders/', include('apps.orders.urls')),
+    path('api/v1/delivery/', include('apps.delivery.urls')),
+    path('api/v1/admin/', include('apps.adminpanel.urls')),
 
     # API Documentation
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

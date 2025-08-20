@@ -2,50 +2,33 @@ from .base import *
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
-import boto3
 import os
-
-# AWS Parameter Store helper function
-def get_parameter(name, default=None, decrypt=True):
-    """
-    Get parameter from AWS Systems Manager Parameter Store
-    Falls back to environment variable if not in AWS environment
-    """
-    try:
-        if os.environ.get('AWS_EXECUTION_ENV') or os.environ.get('ECS_CONTAINER_METADATA_URI'):
-            # Running in AWS environment
-            ssm = boto3.client('ssm', region_name=os.environ.get('AWS_DEFAULT_REGION', 'ap-south-1'))
-            response = ssm.get_parameter(Name=name, WithDecryption=decrypt)
-            return response['Parameter']['Value']
-        else:
-            # Local development - fall back to environment variable
-            env_name = name.split('/')[-1].upper()
-            return os.environ.get(env_name, default)
-    except Exception as e:
-        print(f"Warning: Could not retrieve parameter {name}: {e}")
-        return default
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='').split(',')
+# Production SECRET_KEY - should be set via environment variable
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-d8hsrg5%ne^ba4@@8f%i5i-a%d51m@zqj^7!qhg%d0j08q26s!')
 
-# AWS Configuration
-AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
-AWS_S3_CUSTOM_DOMAIN = config('AWS_S3_CUSTOM_DOMAIN')
-AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl': 'max-age=86400',
-}
-AWS_DEFAULT_ACL = config('AWS_DEFAULT_ACL', default='public-read')
-AWS_LOCATION = 'static'
+# Production ALLOWED_HOSTS
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
 
-# Cloudinary Configuration - Use AWS Parameter Store in production
+# Simplified middleware for debugging health check issues
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+# Cloudinary Configuration
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': get_parameter('/dealsbasket/cloudinary_cloud_name', config('CLOUDINARY_CLOUD_NAME', default='')),
-    'API_KEY': get_parameter('/dealsbasket/cloudinary_api_key', config('CLOUDINARY_API_KEY', default='')),
-    'API_SECRET': get_parameter('/dealsbasket/cloudinary_api_secret', config('CLOUDINARY_API_SECRET', default='')),
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default=''),
+    'API_KEY': config('CLOUDINARY_API_KEY', default=''),
+    'API_SECRET': config('CLOUDINARY_API_SECRET', default=''),
 }
 
 cloudinary.config(
@@ -54,17 +37,16 @@ cloudinary.config(
     api_secret=CLOUDINARY_STORAGE['API_SECRET']
 )
 
-# Database - Use AWS Parameter Store for sensitive data
+# Database Configuration
 DATABASES = {
     'default': {
         'ENGINE': config('DB_ENGINE', default='django.db.backends.postgresql'),
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': get_parameter('/dealsbasket/db_password', config('DB_PASSWORD', default='')),
+        'NAME': config('DB_NAME', default='dealsbasket'),
+        'USER': config('DB_USER', default='postgres'),
+        'PASSWORD': config('DB_PASSWORD', default=''),
         'HOST': config('DB_HOST', default='localhost'),
         'PORT': config('DB_PORT', default='5432'),
         'OPTIONS': {
-            'sslmode': 'require',
             'connect_timeout': 10,
         },
         'CONN_MAX_AGE': 600,  # Connection pooling
@@ -93,26 +75,29 @@ CSRF_COOKIE_HTTPONLY = True
 # Storage Configuration
 STATICFILES_STORAGE = config(
     'STATICFILES_STORAGE',
-    default='server.storage_backends.StaticStorage'
+    default='server.storage_backends.LocalStaticStorage'
 )
 DEFAULT_FILE_STORAGE = config(
     'DEFAULT_FILE_STORAGE',
-    default='server.storage_backends.HybridCloudinaryStorage'
+    default='server.storage_backends.CloudinaryOnlyStorage'
 )
-MEDIA_URL = config('MEDIA_URL')
-STATIC_URL = config('STATIC_URL')
+MEDIA_URL = config('MEDIA_URL', default='/media/')
+STATIC_URL = config('STATIC_URL', default='/static/')
 
-# Email configuration for production - Use AWS Parameter Store
+# Set static root for collectstatic during build
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Email configuration for production
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
-EMAIL_HOST = get_parameter('/dealsbasket/email_host', config('EMAIL_HOST', default='smtp-relay.brevo.com'))
+EMAIL_HOST = config('EMAIL_HOST', default='smtp-relay.brevo.com')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
-EMAIL_HOST_USER = get_parameter('/dealsbasket/email_host_user', config('EMAIL_HOST_USER', default=''))
-EMAIL_HOST_PASSWORD = get_parameter('/dealsbasket/email_host_password', config('EMAIL_HOST_PASSWORD', default=''))
-DEFAULT_FROM_EMAIL = get_parameter('/dealsbasket/default_from_email', config('DEFAULT_FROM_EMAIL', default=''))
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='')
 
-# Override JWT secret key with Parameter Store value
-JWT_SECRET_KEY = get_parameter('/dealsbasket/jwt_secret_key', config('JWT_SECRET_KEY', default=SECRET_KEY))
+# JWT secret key
+JWT_SECRET_KEY = config('JWT_SECRET_KEY', default=SECRET_KEY)
 
 # Logging configuration
 LOGGING = {

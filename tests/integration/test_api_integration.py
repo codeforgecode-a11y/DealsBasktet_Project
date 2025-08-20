@@ -30,9 +30,9 @@ from django.db import transaction
 from rest_framework.test import APIClient
 from rest_framework import status
 from unittest.mock import patch, MagicMock
-from shop.models import Shop
-from products.models import Product, Category
-from orders.models import Order, OrderItem
+from apps.shop.models import Shop
+from apps.products.models import Product, Category
+from apps.orders.models import Order, OrderItem
 
 User = get_user_model()
 
