@@ -5,6 +5,7 @@ import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 from dotenv import load_dotenv
+import sentry_sdk
 
 # Load environment variables from .env file
 load_dotenv()
@@ -14,12 +15,18 @@ dotenv = os.environ
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = dotenv.get('SECRET_KEY')
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-d8hsrg5%ne^ba4@@8f%i5i-a%d51m@zqj^7!qhg%d0j08q26s!')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = dotenv.get('DEBUG')
+DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = dotenv.get('ALLOWED_HOSTS').split(',')
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
 
+sentry_sdk.init(
+    dsn="https://bf3391ed8c0bdc9d1e65766f214f6009@o4509877414330368.ingest.us.sentry.io/4509877415378944",
+    # Add data like request headers and IP for users,
+    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+    send_default_pii=True,
+)
 
 # Application definition
 
@@ -38,12 +45,12 @@ INSTALLED_APPS = [
     'cloudinary',
 
     # Local apps
-    'users',
-    'shop',
-    'products',
-    'orders',
-    'delivery',
-    'adminpanel',
+    'apps.users',
+    'apps.shop',
+    'apps.products',
+    'apps.orders',
+    'apps.delivery',
+    'apps.adminpanel',
 ]
 
 MIDDLEWARE = [
@@ -74,7 +81,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'server.wsgi.application'
+ASGI_APPLICATION = 'server.asgi.application'
 
 
 # Database
@@ -82,12 +89,12 @@ WSGI_APPLICATION = 'server.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': dotenv.get('DB_ENGINE'),
-        'NAME': dotenv.get('DB_NAME'),
-        'USER': dotenv.get('DB_USER'),
-        'PASSWORD': dotenv.get('DB_PASSWORD'),
-        'HOST': dotenv.get('DB_HOST'),
-        'PORT': dotenv.get('DB_PORT'),
+        'ENGINE': config('DB_ENGINE', default='django.db.backends.sqlite3'),
+        'NAME': config('DB_NAME', default=BASE_DIR / 'db.sqlite3'),
+        'USER': config('DB_USER', default=''),
+        'PASSWORD': config('DB_PASSWORD', default=''),
+        'HOST': config('DB_HOST', default=''),
+        'PORT': config('DB_PORT', default=''),
     }
 }
 
@@ -139,7 +146,7 @@ AUTH_USER_MODEL = 'users.User'
 # Django REST Framework Configuration
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'users.jwt_authentication.JWTAuthentication',
+        'apps.users.jwt_authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
@@ -159,22 +166,22 @@ REST_FRAMEWORK = {
 }
 
 # CORS Configuration
-CORS_ALLOWED_ORIGINS = dotenv.get('CORS_ALLOWED_ORIGINS').split(',')
+CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:3000').split(',')
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = DEBUG  # Only allow all origins in development
 
 # Cloudinary Configuration
 cloudinary.config(
-    cloud_name=dotenv.get('CLOUDINARY_CLOUD_NAME'),
-    api_key=dotenv.get('CLOUDINARY_API_KEY'),
-    api_secret=dotenv.get('CLOUDINARY_API_SECRET'),
+    cloud_name=config('CLOUDINARY_CLOUD_NAME', default=''),
+    api_key=config('CLOUDINARY_API_KEY', default=''),
+    api_secret=config('CLOUDINARY_API_SECRET', default=''),
     secure=True
 )
 
 # JWT Settings
-JWT_SECRET_KEY = dotenv.get('JWT_SECRET_KEY', SECRET_KEY)
-JWT_ACCESS_TOKEN_LIFETIME = int(dotenv.get('JWT_ACCESS_TOKEN_LIFETIME', 60))  # minutes
-JWT_REFRESH_TOKEN_LIFETIME = int(dotenv.get('JWT_REFRESH_TOKEN_LIFETIME', 7))  # days
+JWT_SECRET_KEY = config('JWT_SECRET_KEY', default=SECRET_KEY)
+JWT_ACCESS_TOKEN_LIFETIME = config('JWT_ACCESS_TOKEN_LIFETIME_MINUTES', default=60, cast=int)  # minutes
+JWT_REFRESH_TOKEN_LIFETIME = config('JWT_REFRESH_TOKEN_LIFETIME_DAYS', default=7, cast=int)  # days
 JWT_ALGORITHM = 'HS256'
 
 # API Documentation

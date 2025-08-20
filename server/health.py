@@ -29,14 +29,13 @@ def simple_health_check(request):
         host_allowed = host in allowed_hosts or '*' in allowed_hosts
         debug_info.append(f"Host allowed: {host_allowed}")
 
-        # Check if we can access Parameter Store
+        # Check environment configuration
         try:
-            from server.settings.production import get_parameter
-            param_value = get_parameter('/dealsbasket/allowed_hosts', 'fallback')
-            debug_info.append(f"Parameter Store access: SUCCESS")
-            debug_info.append(f"Parameter value: {param_value}")
-        except Exception as param_e:
-            debug_info.append(f"Parameter Store access: FAILED - {str(param_e)}")
+            import os
+            debug_info.append(f"Environment: {os.environ.get('ENVIRONMENT', 'development')}")
+            debug_info.append(f"Database URL configured: {'DATABASE_URL' in os.environ}")
+        except Exception as env_e:
+            debug_info.append(f"Environment check: FAILED - {str(env_e)}")
 
         response_text = "OK\n" + "\n".join(debug_info)
         return HttpResponse(response_text, content_type="text/plain", status=200)

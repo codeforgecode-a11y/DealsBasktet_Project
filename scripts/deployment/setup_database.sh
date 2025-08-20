@@ -8,10 +8,11 @@ set -e
 echo "🗄️  Setting up DealsBasket database..."
 
 # Load environment variables
-if [ -f config/aws/.env.aws ]; then
-    source config/aws/.env.aws
+# Load environment variables from .env file
+if [ -f .env ]; then
+    source .env
 else
-    echo "❌ Environment file not found. Please create config/aws/.env.aws"
+    echo "❌ .env file not found. Please create .env file with required variables."
     exit 1
 fi
 

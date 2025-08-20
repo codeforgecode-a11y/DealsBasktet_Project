@@ -4,7 +4,13 @@
 set -e
 
 # Load environment variables
-source .env.production
+# Load environment variables from .env file
+if [ -f .env ]; then
+    source .env
+else
+    echo "❌ .env file not found. Please create .env file with required variables."
+    exit 1
+fi
 
 # Set backup directory
 BACKUP_DIR="backups/$(date +%Y%m%d)"

@@ -2,7 +2,13 @@
 
 # Load environment variables
 set -a
-source config/database/.env.production
+# Load environment variables from .env file
+if [ -f .env ]; then
+    source .env
+else
+    echo "❌ .env file not found. Please create .env file with required variables."
+    exit 1
+fi
 set +a
 
 echo "Testing connection to PostgreSQL database..."

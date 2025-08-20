@@ -19,6 +19,10 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from .health import health_check, simple_health_check
 
+# Trigger an error for Sentry testing
+def trigger_error(request):
+    division_by_zero = 1 / 0
+    return HttpResponse("OK", content_type="text/plain", status=200)
 
 def basic_health_check(request):
     """Ultra-simple health check that bypasses all Django middleware"""
@@ -60,11 +64,11 @@ urlpatterns = [
     path('health/', health_check, name='health-check'),
     path('simple-health/', simple_health_check, name='simple-health-check'),
     path('basic-health/', basic_health_check, name='basic-health-check'),
+    path('sentry-debug/', trigger_error),  # Trigger an error for Sentry testing
 
     # API root
     path('api/', api_root, name='api-root'),
 
-    # Authentication endpoints
     # Authentication endpoints
     path('api/auth/', include('apps.users.auth_urls')),
     path('api/auth/jwt/', include('apps.users.jwt_urls')),
