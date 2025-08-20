@@ -42,7 +42,7 @@ cloudinary.config(
     api_secret=CLOUDINARY_STORAGE['API_SECRET']
 )
 
-# Database Configuration - Support for Render PostgreSQL
+# Database Configuration - Support for AWS RDS PostgreSQL and Render
 DATABASE_URL = config('DATABASE_URL', default='')
 
 if DATABASE_URL:
@@ -63,6 +63,7 @@ else:
             'PORT': config('DB_PORT', default='5432'),
             'OPTIONS': {
                 'connect_timeout': 10,
+                'sslmode': 'prefer',  # Use SSL for AWS RDS connections
             },
             'CONN_MAX_AGE': 600,  # Connection pooling
         }

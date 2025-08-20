@@ -1,4 +1,5 @@
 # Render.com deployment configuration for DealsBasket
+# Configured to use external AWS RDS PostgreSQL database
 services:
   # Web service
   - type: web
@@ -26,14 +27,15 @@ services:
       - key: DJANGO_SUPERUSER_EMAIL
         value: admin@dealsbasket.com
       - key: DJANGO_SUPERUSER_PASSWORD
+
         generateValue: true
       # Cloudinary configuration (optional)
       - key: CLOUDINARY_CLOUD_NAME
-        value: ""  # Set your Cloudinary cloud name
+        value: "dq7zkxtnj"  # Set your Cloudinary cloud name
       - key: CLOUDINARY_API_KEY
-        value: ""  # Set your Cloudinary API key
+        value: "227928539487962"  # Set your Cloudinary API key
       - key: CLOUDINARY_API_SECRET
-        value: ""  # Set your Cloudinary API secret
+        value: "wlHSgdQX7w7nzUVnR49Z1mKkWBI"  # Set your Cloudinary API secret
       # Email configuration (optional)
       - key: EMAIL_HOST
         value: smtp-relay.brevo.com
@@ -42,11 +44,11 @@ services:
       - key: EMAIL_USE_TLS
         value: true
       - key: EMAIL_HOST_USER
-        value: ""  # Set your email username
+        value: "923d7c001@smtp-brevo.com"  # Set your email username
       - key: EMAIL_HOST_PASSWORD
-        value: ""  # Set your email password
+        value: "ODZYXTvEVr4hjCSG"  # Set your email password
       - key: DEFAULT_FROM_EMAIL
-        value: noreply@dealsbasket.com
+        value: codeforge.code@gmail.com
       # CORS configuration
       - key: CORS_ALLOWED_ORIGINS
         value: "https://your-frontend-domain.com"
@@ -89,13 +91,32 @@ services:
       # Frontend URL
       - key: FRONTEND_URL
         value: "https://your-frontend-domain.com"
+      # AWS RDS PostgreSQL Database Configuration
+      - key: DB_ENGINE
+        value: "django.db.backends.postgresql"
+      - key: DB_NAME
+        value: "dealsbasket"
+      - key: DB_USER
+        value: "durgesh"
+      - key: DB_PASSWORD
+        value: "DUrg7080"
+      - key: DB_HOST
+        value: "dealsbasket.chi4u4q4kiid.ap-south-1.rds.amazonaws.com"
+      - key: DB_PORT
+        value: "5432"
+      # Database SSL Configuration for AWS RDS
+      - key: DB_SSLMODE
+        value: "prefer"
+      # Alternative: Use DATABASE_URL format (comment out individual DB settings above if using this)
+      # - key: DATABASE_URL
+      #   value: "postgresql://durgesh:DUrg7080@dealsbasket.chi4u4q4kiid.ap-south-1.rds.amazonaws.com:5432/dealsbasket?sslmode=prefer"
 
-# Database service
-databases:
-  - name: dealsbasket-db
-    databaseName: dealsbasket
-    user: dealsbasket_user
-    plan: starter  # Change to 'standard' or 'pro' for production
+# Database service - DISABLED (Using external AWS RDS PostgreSQL)
+# databases:
+#   - name: dealsbasket-db
+#     databaseName: dealsbasket
+#     user: dealsbasket_user
+#     plan: starter  # Change to 'standard' or 'pro' for production
 
 # Redis service (optional for caching)
 # Uncomment if you want to use Redis for caching
@@ -103,3 +124,29 @@ databases:
 #   name: dealsbasket-redis
 #   plan: starter
 #   maxmemoryPolicy: allkeys-lru
+
+# =============================================================================
+# AWS RDS PostgreSQL Configuration Notes
+# =============================================================================
+# This configuration uses an external AWS RDS PostgreSQL database instead of
+# Render's managed PostgreSQL service. The database connection details are
+# configured via environment variables in the web service section above.
+#
+# Database Details:
+# - Host: dealsbasket.chi4u4q4kiid.ap-south-1.rds.amazonaws.com
+# - Database: dealsbasket
+# - User: durgesh
+# - Port: 5432
+# - Region: ap-south-1 (Asia Pacific - Mumbai)
+#
+# Security Considerations:
+# - Ensure RDS security group allows connections from Render IP ranges
+# - Use strong passwords and consider rotating them regularly
+# - Enable SSL/TLS encryption for database connections
+# - Monitor database access logs
+#
+# Alternative Configuration:
+# You can use DATABASE_URL instead of individual DB settings by uncommenting
+# the DATABASE_URL environment variable above and commenting out the individual
+# DB_* variables.
+# =============================================================================
